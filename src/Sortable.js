@@ -743,7 +743,7 @@ Sortable.prototype = /** @lends Sortable.prototype */ {
 		}
 	},
 
-	_emulateDragOver: function () {
+	async _emulateDragOver: function () {
 		if (touchEvt) {
 			this._lastX = touchEvt.clientX;
 			this._lastY = touchEvt.clientY;
@@ -766,7 +766,7 @@ Sortable.prototype = /** @lends Sortable.prototype */ {
 					if (parent[expando]) {
 						let inserted;
 
-						inserted = parent[expando]._onDragOver({
+						inserted = await parent[expando]._onDragOver({
 							clientX: touchEvt.clientX,
 							clientY: touchEvt.clientY,
 							target: target,
@@ -990,7 +990,7 @@ Sortable.prototype = /** @lends Sortable.prototype */ {
 
 
 	// Returns true - if no further action is needed (either inserted or another condition)
-	_onDragOver: function (/**Event*/evt) {
+	async _onDragOver: function (/**Event*/evt) {
 		let el = this.el,
 			target = evt.target,
 			dragRect,
@@ -1020,7 +1020,7 @@ Sortable.prototype = /** @lends Sortable.prototype */ {
 				fromSortable,
 				target,
 				completed,
-				onMove(target, after) {
+				async onMove(target, after) {
 					return onMove(rootEl, el, dragEl, dragRect, target, getRect(target), evt, after);
 				},
 				changed,
@@ -1187,7 +1187,7 @@ Sortable.prototype = /** @lends Sortable.prototype */ {
 					targetRect = getRect(target);
 				}
 
-				if (onMove(rootEl, el, dragEl, dragRect, target, targetRect, evt, !!target) !== false) {
+				if (await onMove(rootEl, el, dragEl, dragRect, target, targetRect, evt, !!target) !== false) {
 					capture();
 					if (elLastChild && elLastChild.nextSibling) { // the last draggable element is not the last node
 						el.insertBefore(dragEl, elLastChild.nextSibling);
@@ -1210,7 +1210,7 @@ Sortable.prototype = /** @lends Sortable.prototype */ {
 				target = firstChild;
 				targetRect = getRect(target);
 
-				if (onMove(rootEl, el, dragEl, dragRect, target, targetRect, evt, false) !== false) {
+				if (await onMove(rootEl, el, dragEl, dragRect, target, targetRect, evt, false) !== false) {
 					capture();
 					el.insertBefore(dragEl, firstChild);
 					parentEl = el; // actualization
@@ -1272,7 +1272,7 @@ Sortable.prototype = /** @lends Sortable.prototype */ {
 
 				after = direction === 1;
 
-				let moveVector = onMove(rootEl, el, dragEl, dragRect, target, targetRect, evt, after);
+				let moveVector = await onMove(rootEl, el, dragEl, dragRect, target, targetRect, evt, after);
 
 				if (moveVector !== false) {
 					if (moveVector === 1 || moveVector === -1) {
@@ -1745,7 +1745,7 @@ function _globalDragOver(/**Event*/evt) {
 	evt.cancelable && evt.preventDefault();
 }
 
-function onMove(fromEl, toEl, dragEl, dragRect, targetEl, targetRect, originalEvent, willInsertAfter) {
+async function onMove(fromEl, toEl, dragEl, dragRect, targetEl, targetRect, originalEvent, willInsertAfter) {
 	let evt,
 		sortable = fromEl[expando],
 		onMoveFn = sortable.options.onMove,
@@ -1774,7 +1774,7 @@ function onMove(fromEl, toEl, dragEl, dragRect, targetEl, targetRect, originalEv
 	fromEl.dispatchEvent(evt);
 
 	if (onMoveFn) {
-		retVal = onMoveFn.call(sortable, evt, originalEvent);
+		retVal = await onMoveFn.call(sortable, evt, originalEvent);
 	}
 
 	return retVal;
